@@ -35,12 +35,18 @@ typedef struct
 
 typedef struct
 {
+  Delimiter *data;
+  size_t size;
+  size_t capacity;
+} DelimiterStack;
+
+typedef struct
+{
   uint16_t previous_indent_length;
-  Delimiter *delimiter_stack;
-  size_t delimiter_stack_size;
-  size_t delimiter_stack_capacity;
+  DelimiterStack delimiter_stack;
 } Scanner;
 
+// Delimiter functions
 static void Delimiter_init(Delimiter *delimiter)
 {
   delimiter->flags = 0;
@@ -70,23 +76,80 @@ static void Delimiter_set_end_character(Delimiter *delimiter, int32_t character)
   }
 }
 
+// DelimiterStack functions
+static inline void DelimiterStack_init(DelimiterStack *stack)
+{
+  stack->data = NULL;
+  stack->size = 0;
+  stack->capacity = 0;
+}
+
+static void DelimiterStack_free(DelimiterStack *stack)
+{
+  if (stack->data != NULL)
+  {
+    free(stack->data);
+  }
+}
+
+static inline void DelimiterStack_clear(DelimiterStack *stack)
+{
+  if (stack->data != NULL)
+  {
+    free(stack->data);
+  }
+  stack->data = NULL;
+  stack->size = 0;
+  stack->capacity = 0;
+}
+
+static inline void DelimiterStack_resize(DelimiterStack *stack, size_t new_size)
+{
+  stack->data = (Delimiter *)realloc(stack->data, new_size * sizeof(Delimiter));
+  assert(stack->data != NULL);
+  stack->capacity = new_size;
+  stack->size = new_size;
+}
+
+static inline void DelimiterStack_push(DelimiterStack *stack, Delimiter delimiter)
+{
+  if (stack->size == stack->capacity)
+  {
+    DelimiterStack_resize(stack, stack->capacity ? stack->capacity * 2 : 1);
+  }
+  stack->data[stack->size++] = delimiter;
+}
+
+static inline Delimiter DelimiterStack_pop(DelimiterStack *stack)
+{
+  assert(stack->size > 0);
+  return stack->data[--stack->size];
+}
+
+static inline Delimiter DelimiterStack_peek(const DelimiterStack *stack)
+{
+  assert(stack->size > 0);
+  return stack->data[stack->size - 1];
+}
+
+static inline bool DelimiterStack_is_empty(const DelimiterStack *stack)
+{
+  return stack->size == 0;
+}
+
+// Scanner functions
 static Scanner *Scanner_new()
 {
   Scanner *scanner = (Scanner *)malloc(sizeof(Scanner));
   assert(scanner != NULL);
   scanner->previous_indent_length = 0;
-  scanner->delimiter_stack = NULL;
-  scanner->delimiter_stack_size = 0;
-  scanner->delimiter_stack_capacity = 0;
+  DelimiterStack_init(&scanner->delimiter_stack);
   return scanner;
 }
 
 static void Scanner_free(Scanner *scanner)
 {
-  if (scanner->delimiter_stack != NULL)
-  {
-    free(scanner->delimiter_stack);
-  }
+  DelimiterStack_free(&scanner->delimiter_stack);
   free(scanner);
 }
 
@@ -95,16 +158,16 @@ static unsigned Scanner_serialize(Scanner *scanner, char *buffer)
   size_t i = 0;
 
   // Serialize the delimiter_stack
-  size_t delimiter_count = scanner->delimiter_stack_size;
+  size_t delimiter_count = scanner->delimiter_stack.size;
   if (delimiter_count > UINT8_MAX)
     delimiter_count = UINT8_MAX;
   buffer[i++] = delimiter_count;
 
   if (delimiter_count > 0)
   {
-    memcpy(&buffer[i], scanner->delimiter_stack, delimiter_count * sizeof(Delimiter));
+    memcpy(&buffer[i], scanner->delimiter_stack.data, delimiter_count);
   }
-  i += delimiter_count * sizeof(Delimiter);
+  i += delimiter_count;
 
   // Serialize the previous_indent_length
   buffer[i++] = scanner->previous_indent_length;
@@ -114,14 +177,8 @@ static unsigned Scanner_serialize(Scanner *scanner, char *buffer)
 
 static void Scanner_deserialize(Scanner *scanner, const char *buffer, unsigned length)
 {
+  DelimiterStack_clear(&scanner->delimiter_stack);
   scanner->previous_indent_length = 0;
-
-  if (scanner->delimiter_stack != NULL)
-  {
-    free(scanner->delimiter_stack);
-    scanner->delimiter_stack = NULL;
-  }
-  scanner->delimiter_stack_size = 0;
 
   if (length > 0)
   {
@@ -129,15 +186,12 @@ static void Scanner_deserialize(Scanner *scanner, const char *buffer, unsigned l
 
     // Deserialize (delimiter_count, *delimiter_stack)
     size_t delimiter_count = (uint8_t)buffer[i++];
-    scanner->delimiter_stack = (Delimiter *)malloc(delimiter_count * sizeof(Delimiter));
-    assert(scanner->delimiter_stack != NULL);
-    scanner->delimiter_stack_size = delimiter_count;
-    scanner->delimiter_stack_capacity = delimiter_count;
+    DelimiterStack_resize(&scanner->delimiter_stack, delimiter_count);
     if (delimiter_count > 0)
     {
-      memcpy(scanner->delimiter_stack, &buffer[i], delimiter_count * sizeof(Delimiter));
+      memcpy(scanner->delimiter_stack.data, &buffer[i], delimiter_count);
     }
-    i += delimiter_count * sizeof(Delimiter);
+    i += delimiter_count;
 
     // Deserialize previous_indent_length
     scanner->previous_indent_length = buffer[i++];
@@ -271,9 +325,9 @@ static inline bool find_match_end(TSLexer *lexer, bool skip_any)
 static bool Scanner_scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols)
 {
   // Check for string content.
-  if (valid_symbols[STRING_CONTENT] && scanner->delimiter_stack_size > 0)
+  if (valid_symbols[STRING_CONTENT] && !DelimiterStack_is_empty(&scanner->delimiter_stack))
   {
-    Delimiter delimiter = scanner->delimiter_stack[scanner->delimiter_stack_size - 1];
+    Delimiter delimiter = DelimiterStack_peek(&scanner->delimiter_stack);
     int32_t end_character = Delimiter_end_character(&delimiter);
     bool has_content = false;
     while (lexer->lookahead)
@@ -299,7 +353,7 @@ static bool Scanner_scan(Scanner *scanner, TSLexer *lexer, const bool *valid_sym
         else
         {
           advance(lexer);
-          scanner->delimiter_stack_size--;
+          DelimiterStack_pop(&scanner->delimiter_stack);
           lexer->result_symbol = STRING_END;
         }
         lexer->mark_end(lexer);
@@ -420,13 +474,7 @@ static bool Scanner_scan(Scanner *scanner, TSLexer *lexer, const bool *valid_sym
 
     if (Delimiter_end_character(&delimiter))
     {
-      if (scanner->delimiter_stack_size == scanner->delimiter_stack_capacity)
-      {
-        scanner->delimiter_stack_capacity = scanner->delimiter_stack_capacity ? scanner->delimiter_stack_capacity * 2 : 1;
-        scanner->delimiter_stack = (Delimiter *)realloc(scanner->delimiter_stack, scanner->delimiter_stack_capacity * sizeof(Delimiter));
-        assert(scanner->delimiter_stack != NULL);
-      }
-      scanner->delimiter_stack[scanner->delimiter_stack_size++] = delimiter;
+      DelimiterStack_push(&scanner->delimiter_stack, delimiter);
       lexer->result_symbol = STRING_START;
       return true;
     }
