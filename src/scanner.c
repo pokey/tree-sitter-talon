@@ -105,17 +105,19 @@ static inline void DelimiterStack_clear(DelimiterStack *stack)
 
 static inline void DelimiterStack_resize(DelimiterStack *stack, size_t new_size)
 {
-  stack->data = (Delimiter *)realloc(stack->data, new_size * sizeof(Delimiter));
+  stack->data = (Delimiter *)realloc(stack->data, new_size);
   assert(stack->data != NULL);
   stack->capacity = new_size;
   stack->size = new_size;
 }
 
-static inline void DelimiterStack_push(DelimiterStack *stack, Delimiter delimiter)
+static void DelimiterStack_push(DelimiterStack *stack, Delimiter delimiter)
 {
   if (stack->size == stack->capacity)
   {
-    DelimiterStack_resize(stack, stack->capacity ? stack->capacity * 2 : 1);
+    stack->capacity = stack->capacity ? stack->capacity * 2 : 1;
+    stack->data = (Delimiter *)realloc(stack->data, stack->capacity);
+    assert(stack->data != NULL);
   }
   stack->data[stack->size++] = delimiter;
 }
