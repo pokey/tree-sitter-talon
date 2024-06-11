@@ -313,8 +313,6 @@ module.exports = grammar({
     parenthesized_expression: ($) =>
       prec(PREC.parenthesized_expression, seq("(", $.expression, ")")),
 
-    operator: ($) => /[\p{Dash_Punctuation}\p{Math_Symbol}]+/,
-
     binary_operator: ($) => {
       const table = [
         [prec.left, "+", PREC.plus],
