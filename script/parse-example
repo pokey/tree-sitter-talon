@@ -31,7 +31,7 @@ if [ "$mode" == "native" ]; then
   tree-sitter test -f 'just compile it' >/dev/null
 elif [ "$mode" == "wasm" ]; then
   # Ensure tree-sitter-talon.wasm was compiled
-  npx tree-sitter build-wasm
+  npx tree-sitter build --wasm
 fi
 
 start=$(date '+%s.%N')
