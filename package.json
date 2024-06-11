@@ -9,7 +9,7 @@
     "test": "tree-sitter test && script/parse-examples",
     "test-update": "npm run pretest && tree-sitter test --update",
     "pretest-wasm": "npm run build-wasm",
-    "build-wasm": "tree-sitter build-wasm",
+    "build-wasm": "tree-sitter build --wasm",
     "test-wasm": "npm run pretest-wasm && script/parse-examples wasm",
     "bump": "pipx run bumpver update",
     "prepublish": "npm run build && npm run build-wasm"
@@ -32,8 +32,11 @@
     "nan": "^2.16.0"
   },
   "devDependencies": {
-    "tree-sitter-cli": "^0.20.8",
-    "web-tree-sitter": "^0.20"
+    "tree-sitter-cli": "^0.22.6",
+    "web-tree-sitter": "^0.22.6"
+  },
+  "peerDependencies": {
+    "tree-sitter": "^0.21.1"
   },
   "tree-sitter": [
     {
