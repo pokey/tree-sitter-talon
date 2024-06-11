@@ -149,6 +149,11 @@ static inline bool is_whitespace(int32_t lookahead)
   return lookahead == ' ' || lookahead == '\t' || lookahead == '\r' || lookahead == '\f';
 }
 
+static void skip(TSLexer *lexer)
+{
+  lexer->advance(lexer, true);
+}
+
 static inline int skip_whitespace(TSLexer *lexer)
 {
   int indent_length = 0;
@@ -193,11 +198,6 @@ static void advance_line(TSLexer *lexer, bool skip)
 static void advance(TSLexer *lexer)
 {
   lexer->advance(lexer, false);
-}
-
-static void skip(TSLexer *lexer)
-{
-  lexer->advance(lexer, true);
 }
 
 static inline bool find_match_end(TSLexer *lexer, bool skip_any)
