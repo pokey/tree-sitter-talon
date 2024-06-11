@@ -84,7 +84,7 @@ static inline void DelimiterStack_init(DelimiterStack *stack)
   stack->capacity = 0;
 }
 
-static void DelimiterStack_free(DelimiterStack *stack)
+static inline void DelimiterStack_free(DelimiterStack *stack)
 {
   if (stack->data != NULL)
   {
@@ -94,13 +94,8 @@ static void DelimiterStack_free(DelimiterStack *stack)
 
 static inline void DelimiterStack_clear(DelimiterStack *stack)
 {
-  if (stack->data != NULL)
-  {
-    free(stack->data);
-  }
-  stack->data = NULL;
-  stack->size = 0;
-  stack->capacity = 0;
+  DelimiterStack_free(stack);
+  DelimiterStack_init(stack);
 }
 
 static inline void DelimiterStack_resize(DelimiterStack *stack, size_t new_size)
