@@ -4,3 +4,6 @@
 /examples/*/
 /target/
 *.log
+/talon.dylib.dSYM/
+/prebuilds/
+/talon.dylib
