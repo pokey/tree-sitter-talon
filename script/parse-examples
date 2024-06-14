@@ -20,14 +20,14 @@ function clone_repo {
     repo_name=$2
     repo_ref=$3
     repo_slug="$repo_owner/$repo_name"
-    
+
     example_slug="$repo_owner-$repo_name"
     example_path="examples/$example_slug"
     example_slugs+=($example_slug)
     if [ ! -d "$example_path" ]; then
         git clone "https://github.com/$repo_slug" "$example_path" --quiet
     fi
-    
+
     pushd "$example_path" >/dev/null
     git fetch --quiet
     git reset --hard "$repo_ref" --quiet

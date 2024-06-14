@@ -280,7 +280,7 @@ os: mac
 
 fullscreen enter: user.action_windows("fullscreen", 1, 0)
 fullscreen exit: key(cmd-ctrl-f)
-  
+
 --------------------------------------------------------------------------------
 
 (source_file
@@ -413,7 +413,7 @@ document open in <user.launch_applications>: user.open_current_doc_in_app(user.l
 document open in <user.running_applications>: user.open_current_doc_in_app(user.running_applications)
 document (reveal|show): user.reveal_current_doc()
 document copy path: user.copy_current_doc_path()
-  
+
 --------------------------------------------------------------------------------
 
 (source_file
