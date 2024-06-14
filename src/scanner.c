@@ -210,50 +210,10 @@ Scanner_deserialize (Scanner *scanner, const char *buffer, unsigned length)
     }
 }
 
-static inline bool
-is_whitespace (int32_t lookahead)
-{
-  return lookahead == ' ' || lookahead == '\t' || lookahead == '\r'
-         || lookahead == '\f';
-}
-
 static void
 skip (TSLexer *lexer)
 {
   lexer->advance (lexer, true);
-}
-
-static inline int
-skip_whitespace (TSLexer *lexer)
-{
-  int indent_length = 0;
-  for (;;)
-    {
-      if (lexer->lookahead == ' ')
-        { // space
-          indent_length++;
-          skip (lexer);
-        }
-      else if (lexer->lookahead == '\t')
-        { // tab - treat as 8 spaces
-          indent_length += 8;
-          skip (lexer);
-        }
-      else if (lexer->lookahead == '\r')
-        { // carriage return - reset indent
-          indent_length = 0;
-          skip (lexer);
-        }
-      else if (lexer->lookahead == '\f')
-        { // form feed - reset indent
-          indent_length = 0;
-          skip (lexer);
-        }
-      else
-        {
-          return indent_length;
-        }
-    }
 }
 
 static void
@@ -270,77 +230,6 @@ static void
 advance (TSLexer *lexer)
 {
   lexer->advance (lexer, false);
-}
-
-static inline bool
-find_match_end (TSLexer *lexer, bool skip_any)
-{
-
-  // Search for "-\n" at the start of the file or line.
-  MatchState match_state = LINE_START;
-  while (lexer->lookahead)
-    {
-      // Found a dash at the start of a file or line.
-      if (lexer->lookahead == '-')
-        {
-          if (match_state == LINE_START || match_state == DASHES)
-            {
-              match_state = DASHES;
-              advance (lexer);
-            }
-          else
-            { // If AFTER_DASHES, set match_state to LINE_CONTENT,
-              // e.g., "-- -- --" is not a valid separator.
-              match_state = LINE_CONTENT;
-              skip (lexer);
-            }
-        }
-      // Found the end of the line.
-      else if (lexer->lookahead == '\n')
-        {
-          if (match_state == DASHES || match_state == AFTER_DASHES)
-            { // ... *after* dashes
-              return true;
-            }
-          else
-            { // ... *not after* dashes.
-              match_state = LINE_START;
-              skip (lexer);
-            }
-        }
-      // Found the end of the file.
-      else if (lexer->lookahead == 0)
-        {
-          if (match_state == DASHES || match_state == AFTER_DASHES)
-            { // ... *after* dashes
-              return true;
-            }
-          else
-            { // ... *not after* dashes.
-              return false;
-            }
-        }
-      // Found some whitespace after the '-'.
-      else if (is_whitespace (lexer->lookahead)
-               && (match_state == DASHES || match_state == AFTER_DASHES))
-        { // If DASHES, set match_state to AFTER_DASHES, to distinguish
-          // between,
-          // e.g., "--   " (valid) and "-- -- --" (not valid).
-          match_state = AFTER_DASHES;
-          skip (lexer);
-        }
-      // Found any other character.
-      else if (skip_any)
-        {
-          match_state = LINE_CONTENT;
-          skip (lexer);
-        }
-      else
-        {
-          return false;
-        }
-    }
-  return false;
 }
 
 static bool
