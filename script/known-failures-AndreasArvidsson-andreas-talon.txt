@@ -1,2 +1,0 @@
-examples/AndreasArvidsson-andreas-talon/core/modes/dictation_mode_sv.talon
-examples/AndreasArvidsson-andreas-talon/core/on_phrase/abort/abort.talon
