@@ -34,10 +34,10 @@ function clone_repo {
     popd >/dev/null
 }
 
-clone_repo talonhub community 468fb16392e6a9907cb98e2526c1e5cbf3b5fc8d
-clone_repo AndreasArvidsson andreas-talon e9841d0f424501df09b2f200960af2a4d65345a1
-clone_repo phillco talon-axkit 9c33b80585011202eb69b2bdb9be52ed73d3ee85
-clone_repo nriley talon_community f7997eeb39f5f97ae517c057f528ec56635be0d7
+clone_repo AndreasArvidsson andreas-talon 43811bae4c1a75f2ecd29240891f6612a1b7cec5
+clone_repo nriley talon_community 1ff0e36f47689193be1d8909b9935f7c7004a045
+clone_repo phillco talon-axkit 8eecc78b2de65b68123a6e1eae72a5a790a4e407
+clone_repo talonhub community 93c9261c240078c46290ae1a500f2c9cfc749833
 
 for example_slug in ${example_slugs[@]}; do
     script/parse-example "$example_slug" "$mode"
