@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Usage: script/parse-examples [repo_name] [native|wasm]
+# Usage: script/parse-examples [repo_name] [node|wasm]
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
@@ -12,33 +12,35 @@ cd "$(dirname "$0")/.."
 example_slug=$1
 example_path="examples/$example_slug"
 
-# Parse examples in 'native' or 'wasm' mode.
-mode=${2:-native}
+# Parse examples in 'node' or 'wasm' mode.
+mode=${2:-node}
 
 if [ -f "script/known-failures-$example_slug.txt" ]; then
-  known_failures=$(cat "script/known-failures-$example_slug.txt")
+    known_failures=$(cat "script/known-failures-$example_slug.txt")
 fi
 examples_to_parse=$(
-  for example in $(find "$example_path" -name '*.talon'); do
-    if [[ ! $known_failures == *$example* ]]; then
-      echo $example
-    fi
-  done
+    for example in $(find "$example_path" -name '*.talon'); do
+        if [[ ! $known_failures == *$example* ]]; then
+            echo $example
+        fi
+    done
 )
 
-if [ "$mode" == "native" ]; then
-  # Ensure the scanner was recompiled
-  tree-sitter test -f 'just compile it' >/dev/null
-elif [ "$mode" == "wasm" ]; then
-  # Ensure tree-sitter-talon.wasm was compiled
-  npx tree-sitter build --wasm
+if [ "$mode" == "node" ]; then
+    # Ensure the scanner was recompiled
+    # tree-sitter test -f 'just compile it' >/dev/null
+    tree-sitter build
+    elif [ "$mode" == "wasm" ]; then
+    # Ensure tree-sitter-talon.wasm was compiled
+    # npx tree-sitter build --wasm
+    tree-sitter build --wasm
 fi
 
 start=$(date '+%s.%N')
-if [ "$mode" == "native" ]; then
-  echo $examples_to_parse | xargs -n 2000 tree-sitter parse -q
-elif [ "$mode" == "wasm" ]; then
-  echo $examples_to_parse | xargs -n 2000 ./script/tree-sitter-parse.js
+if [ "$mode" == "node" ]; then
+    echo $examples_to_parse | xargs -n 2000 tree-sitter parse -q
+    elif [ "$mode" == "wasm" ]; then
+    echo $examples_to_parse | xargs -n 2000 ./scripts/tree-sitter-parse.js
 fi
 end=$(date '+%s.%N')
 

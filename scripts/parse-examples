@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-# Usage: script/parse-examples [native|wasm]
+# Usage: script/parse-examples [node|wasm]
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-# Parse examples in 'native' or 'wasm' mode.
-mode=${1:-native}
+# Parse examples in 'node' or 'wasm' mode.
+mode=${1:-node}
 
 # Change directory to project root.
 cd "$(dirname "$0")/.."
@@ -20,14 +20,14 @@ function clone_repo {
     repo_name=$2
     repo_ref=$3
     repo_slug="$repo_owner/$repo_name"
-
+    
     example_slug="$repo_owner-$repo_name"
     example_path="examples/$example_slug"
     example_slugs+=($example_slug)
     if [ ! -d "$example_path" ]; then
         git clone "https://github.com/$repo_slug" "$example_path" --quiet
     fi
-
+    
     pushd "$example_path" >/dev/null
     git fetch --quiet
     git reset --hard "$repo_ref" --quiet
@@ -39,6 +39,7 @@ clone_repo nriley talon_community 1ff0e36f47689193be1d8909b9935f7c7004a045
 clone_repo phillco talon-axkit 8eecc78b2de65b68123a6e1eae72a5a790a4e407
 clone_repo talonhub community 93c9261c240078c46290ae1a500f2c9cfc749833
 
+echo "Test examples with $mode"
 for example_slug in ${example_slugs[@]}; do
-    script/parse-example "$example_slug" "$mode"
+    scripts/parse-example "$example_slug" "$mode"
 done
