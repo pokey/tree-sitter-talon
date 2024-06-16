@@ -40,7 +40,7 @@ jobs:
         with:
           version: 3.1.14
           actions-cache-folder: "emsdk-cache"
-      - run: npm install && npm test
+      - run: npm install && npm run test-node
     strategy:
       matrix:
         os:
