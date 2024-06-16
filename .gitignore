@@ -1,7 +1,7 @@
 /Cargo.lock
 /node_modules
 /build
-/examples/*/
+/test/examples/
 /target/
 *.log
 /talon.dylib.dSYM/

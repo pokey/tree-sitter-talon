@@ -9,15 +9,15 @@
     "build": "npm run build-node && npm run build-wasm",
     "build-node": "tree-sitter build && npm run prebuildify",
     "build-wasm": "tree-sitter build --wasm",
-    "pretest": "npm run pretest-node && npm run pretest-wasm",
-    "pretest-node": "npm run build-node",
-    "pretest-wasm": "npm run build-wasm",
+    "pretest": "sh scripts/pretest.sh && npm run build",
+    "pretest-node": "sh scripts/pretest.sh && npm run build-node",
+    "pretest-wasm": "sh scripts/pretest.sh && npm run build-wasm",
     "jest": "jest",
     "jest-node": "sh -c 'MODE=node npx jest'",
     "jest-wasm": "sh -c 'MODE=wasm npx jest'",
-    "test": "npm run test-node && npm run test-wasm",
-    "test-node": "tree-sitter test && npm run jest-node && sh -c 'scripts/parse-examples'",
-    "test-wasm": "npm run jest-wasm && sh -c 'scripts/parse-examples wasm'",
+    "test": "tree-sitter test && jest",
+    "test-node": "tree-sitter test && npm run jest-node",
+    "test-wasm": "npm run jest-wasm",
     "test-update": "tree-sitter test --update",
     "bump": "pipx run bumpver update",
     "install": "node-gyp-build",
@@ -53,10 +53,11 @@
     "node-gyp-build": "^4.8.0"
   },
   "devDependencies": {
+    "glob": "^10.4.1",
     "jest": "^29.7.0",
+    "prebuildify": "^6.0.0",
     "tree-sitter-cli": "^0.22.6",
-    "web-tree-sitter": "^0.22.6",
-    "prebuildify": "^6.0.0"
+    "web-tree-sitter": "^0.22.6"
   },
   "peerDependencies": {
     "tree-sitter": "^0.21.1"

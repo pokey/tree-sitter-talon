@@ -1,7 +1,8 @@
 const { beforeEach, describe, expect, it } = require('@jest/globals');
 const { modes, setup } = require('./common.js');
 
-describe.each(modes())('tree-sitter-talon [%s]', (MODE) => {
+const MODES = modes();
+describe.each(MODES)('comments [%s]', (MODE) => {
   let parser;
   beforeEach(async () => { parser = await setup(MODE) });
   it('should strip newlines from comments', () => {
