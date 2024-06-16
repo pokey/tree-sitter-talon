@@ -8,10 +8,11 @@
     "generate": "tree-sitter generate",
     "build": "npm run prebuildify && tree-sitter build --wasm",
     "pretest": "npm run build",
-    "test": "tree-sitter test && jest && script/parse-examples && script/parse-examples wasm",
+    "test": "tree-sitter test && jest && scripts/parse-examples && scripts/parse-examples wasm",
     "test-update": "npm run pretest && tree-sitter test --update",
     "bump": "pipx run bumpver update",
     "install": "node-gyp-build",
+    "prepack": "sh scripts/prepack.sh",
     "prepublish": "npm run build",
     "prebuildify": "prebuildify --napi --strip"
   },
@@ -29,7 +30,8 @@
     "prebuilds/**",
     "bindings/node/*",
     "queries/*",
-    "src/**"
+    "src/**",
+    "*.wasm"
   ],
   "author": "Wen Kokke",
   "license": "MIT",
