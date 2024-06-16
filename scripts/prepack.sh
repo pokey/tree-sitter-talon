@@ -1,8 +1,8 @@
 #!/bin/sh
 
 npm install
-npm generate
-npm build
+npm run generate
+npm run build
 npm run prebuildify -- --platform linux  --arch x64   --libc musl
 mv prebuilds/linux-x64   prebuilds/linuxmusl-x64
 npm run prebuildify -- --platform linux  --arch arm64 --libc musl
