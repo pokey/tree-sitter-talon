@@ -29,11 +29,10 @@ examples_to_parse=$(
 if [ "$mode" == "node" ]; then
     # Ensure the scanner was recompiled
     # tree-sitter test -f 'just compile it' >/dev/null
-    tree-sitter build
+    npm run build-node
     elif [ "$mode" == "wasm" ]; then
     # Ensure tree-sitter-talon.wasm was compiled
-    # npx tree-sitter build --wasm
-    tree-sitter build --wasm
+    npm run build-wasm
 fi
 
 start=$(date '+%s.%N')
