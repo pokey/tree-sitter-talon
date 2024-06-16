@@ -1,5 +1,8 @@
 /** @type {import('jest').Config} */
 const config = {
-  roots: ["./"]
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/emsdk-cache/",
+  ]
 };
 module.exports = config;
