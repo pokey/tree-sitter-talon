@@ -10,7 +10,7 @@
     "pretest": "npm run build",
     "test": "npm run test-tree-sitter && npm run test-jest && npm run test-examples",
     "test-tree-sitter": "tree-sitter test",
-    "test-jest": "jest ./test",
+    "test-jest": "jest",
     "test-examples": "npm run test-examples-node && npm run test-examples-wasm",
     "test-examples-node": "scripts/parse-examples",
     "test-examples-wasm": "scripts/parse-examples wasm",
