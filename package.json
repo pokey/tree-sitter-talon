@@ -9,9 +9,9 @@
     "build": "npm run build-node && npm run build-wasm",
     "build-node": "tree-sitter build && npm run prebuildify",
     "build-wasm": "tree-sitter build --wasm",
-    "pretest": "node scripts/pretest.js && npm run build",
-    "pretest-node": "node scripts/pretest.js && npm run build-node",
-    "pretest-wasm": "node scripts/pretest.js && npm run build-wasm",
+    "pretest": "npm run build",
+    "pretest-node": "npm run build-node",
+    "pretest-wasm": "npm run build-wasm",
     "jest": "jest",
     "jest-node": "sh -c 'MODE=node npx jest'",
     "jest-wasm": "sh -c 'MODE=wasm npx jest'",
@@ -69,5 +69,13 @@
         "talon"
       ]
     }
-  ]
+  ],
+  "tree-sitter-talon": {
+    "tested-with": [
+      "github:AndreasArvidsson/andreas-talon#43811bae4c1a75f2ecd29240891f6612a1b7cec5",
+      "github:nriley/talon_community#1ff0e36f47689193be1d8909b9935f7c7004a045",
+      "github:phillco/talon-axkit#8eecc78b2de65b68123a6e1eae72a5a790a4e407",
+      "github:talonhub/community#93c9261c240078c46290ae1a500f2c9cfc749833"
+    ]
+  }
 }

@@ -1,19 +1,20 @@
 const { beforeEach, describe, expect, it } = require('@jest/globals');
-const { modes, setup } = require('./common.js');
+const { fetchAllTestData, getTestModes, createParser } = require('./common.js');
 const { globSync } = require('glob');
 const fs = require('fs');
+const path = require('path');
 
-const MODES = modes();
-const REPOS = fs.readdirSync('./examples');
-const TABLE = MODES.flatMap((mode) => REPOS.map((repo) => [repo, mode]));
-
-describe.each(TABLE)('%s [%s]', (REPO, MODE) => {
+const MODES = getTestModes();
+const TEST_DATA_DIRS = fetchAllTestData();
+describe.each(MODES)('examples [%s]', (mode) => {
   let parser;
-  beforeEach(async () => { parser = await setup(MODE) });
-  const files = globSync(`./examples/${REPO}/**/*.talon`);
-  it.each(files)('%s', (file) => {
-    const sourceCode = fs.readFileSync(file, 'utf8')
-    const tree = parser.parse(sourceCode);
-    expect(tree).toBeDefined();
+  beforeEach(async () => { parser = await createParser(mode) });
+  describe.each(TEST_DATA_DIRS)('%s', (testDataDir) => {
+    const testDataFiles = globSync(path.join(testDataDir, '**', '*.talon'));
+    it.each(testDataFiles)('%s', (testDataFile) => {
+      const sourceCode = fs.readFileSync(testDataFile, 'utf8')
+      const tree = parser.parse(sourceCode);
+      expect(tree).toBeDefined();
+    });
   });
 });
