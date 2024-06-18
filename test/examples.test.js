@@ -1,18 +1,18 @@
 const { beforeEach, describe, expect, it } = require('@jest/globals');
 const { fetchAllTestData, getTestModes, createParser } = require('./common.js');
-const { globSync } = require('glob');
 const fs = require('fs');
-const path = require('path');
 
 const MODES = getTestModes();
-const TEST_DATA_DIRS = fetchAllTestData();
+const TEST_DATA = fetchAllTestData();
+const TEST_DIRS = Object.keys(TEST_DATA);
+
 describe.each(MODES)('examples [%s]', (mode) => {
   let parser;
   beforeEach(async () => { parser = await createParser(mode) });
-  describe.each(TEST_DATA_DIRS)('%s', (testDataDir) => {
-    const testDataFiles = globSync(path.join(testDataDir, '**', '*.talon'));
-    it.each(testDataFiles)('%s', (testDataFile) => {
-      const sourceCode = fs.readFileSync(testDataFile, 'utf8')
+  describe.each(TEST_DIRS)('%s', (testDir) => {
+    const testFiles = TEST_DATA[testDir];
+    it.each(testFiles)('%s', (testFile) => {
+      const sourceCode = fs.readFileSync(testFile, 'utf8')
       const tree = parser.parse(sourceCode);
       expect(tree).toBeDefined();
     });
