@@ -1,4 +1,4 @@
-const childProcess = require('child_process');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const packageJson = require('../package.json');
 const path = require('path');
@@ -47,11 +47,21 @@ function fetchTestData(url) {
       fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
     }
     const dataDir = path.join(TEST_DATA_DIR, user, repo);
+    let result;
     if (!fs.existsSync(dataDir)) {
-      childProcess.execSync(`git clone 'https://github.com/${user}/${repo}' '${dataDir}'`);
+      result = spawnSync('git', ['clone', `https://github.com/${user}/${repo}`, dataDir]);
+      if (result.status !== 0) {
+        throw Error(`Could not clone ${url}: ${JSON.stringify(result)}`);
+      }
     }
-    childProcess.execSync(`git fetch --quiet`, { cwd: dataDir });
-    childProcess.execSync(`git reset --hard "${hash}" --quiet`, { cwd: dataDir });
+    result = spawnSync('git', ['fetch', '--quiet'], { cwd: dataDir });
+    if (result.status !== 0) {
+      throw Error(`Could not fetch ${url}: ${JSON.stringify(result)}`);
+    }
+    spawnSync('git', ['reset', '--hard', hash, '--quiet'], { cwd: dataDir });
+    if (result.status !== 0) {
+      throw Error(`Could not reset ${url}: ${JSON.stringify(result)}`);
+    }
     return dataDir;
   }
 }
