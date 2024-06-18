@@ -1,4 +1,4 @@
-const childProcess = require('child_process');
+const { execaSync } = require('execa');
 const fs = require('fs');
 const packageJson = require('../package.json');
 const path = require('path');
@@ -48,10 +48,10 @@ function fetchTestData(url) {
     }
     const dataDir = path.join(TEST_DATA_DIR, user, repo);
     if (!fs.existsSync(dataDir)) {
-      childProcess.execSync(`git clone 'https://github.com/${user}/${repo}' '${dataDir}'`);
+      execaSync('git', ['clone', `https://github.com/${user}/${repo}`, dataDir]);
     }
-    childProcess.execSync(`git fetch --quiet`, { cwd: dataDir });
-    childProcess.execSync(`git reset --hard "${hash}" --quiet`, { cwd: dataDir });
+    execaSync('git', ['fetch', '--quiet'], { cwd: dataDir });
+    execaSync('git', ['reset', '--hard', hash, '--quiet'], { cwd: dataDir });
     return dataDir;
   }
 }
