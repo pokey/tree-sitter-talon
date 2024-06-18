@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-talon",
-  "version": "4.1.0",
+  "version": "5.0.0",
   "description": "Talon grammar for tree-sitter",
   "main": "bindings/node",
   "types": "bindings/node",
